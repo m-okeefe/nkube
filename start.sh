@@ -45,9 +45,9 @@ function does-secret-exist() {
 }
 
 function dns-ready() {
-  local kubeconfig=$1
+  local release=$1
 
-  kubectl --kubeconfig="${kubeconfig}" --namespace=kube-system get pods --show-all \
+  kubectl --context="${release}" --namespace=kube-system get pods --show-all \
     | grep 'kube-dns' \
     | awk '{print $2}' \
     | grep '4/4' &> /dev/null
@@ -84,8 +84,9 @@ function main() {
 
   local port; port="$(${kc} get svc "${release}-nkube-api" --template='{{ range .spec.ports }}{{ .nodePort }}{{ end }}')"
 
-  local kubeconfig; kubeconfig="$(pwd)/admin-${release}.conf"
+  local kubeconfig; kubeconfig="$(pwd)/${release}.conf"
 
+  # TODO pass the secret contents directly to the config update script
   ${kc} get secret "${secret_name}" -o yaml | \
     grep '^  admin.conf' | \
     sed -e 's+^  admin.conf: ++' | \
@@ -94,26 +95,18 @@ function main() {
     sed -e "s+\(server: https://\).*+\1${host_ip}:${port}+" > \
     "${kubeconfig}"
 
-  echo "Wrote kubeconfig to ${kubeconfig}"
-
-  local rc_file="${release}.rc"
-  cat >"${rc_file}" <<EOF
-export NK_KUBECONFIG=${kubeconfig}
-alias nk='KUBECONFIG=${kubeconfig}'
-EOF
+  ./update-config.py "${kubeconfig}"
+  echo "Added context ${release} to config"
+  rm "${kubeconfig}"
 
   echo ""
-  echo "Before invoking kubectl, configure the bash environment by sourcing the cluster's rc file:
-
-  $ . ${rc_file}
-  $ nk kubectl get nodes
-
-"
+  echo "To access the cluster, pass --context=${release} to kubectl"
+  echo ""
 
   start="$(date +%s)"
 
   local msg="cluster dns"
-  local condition="dns-ready ${kubeconfig}"
+  local condition="dns-ready ${release}"
   wait-for-condition "${msg}" "${condition}" 300
 
   end="$(date +%s)"
