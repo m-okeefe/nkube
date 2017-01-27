@@ -30,14 +30,6 @@ minikube start
 helm init
 ```
 
-- Ensure that the ``ip6_tables`` module is loaded on the docker host (required for calico):
-
-```
-minikube ssh
-sudo modprobe ip6_tables
-exit
-```
-
 - From the root of a clone of this repo, start a new nested cluster
   with the calico plugin.  Deployment is likely to take 3-5m,
   depending on the speed of the host and its network connection:
@@ -46,24 +38,14 @@ exit
 ./start.sh [helm install args]
 ```
 
-- Once ``start.sh`` has finished, the cluster's rc file can be sourced to
-  configure the bash environment:
+- Once ``start.sh`` has finished, a context will have been added that
+  will allow access to the cluster:
 
 ```
-. [cluster-id].rc
+kubectl --context=[cluster-id]
 ```
 
-- The rc file creates the ``nk`` alias to allow easy access to both
-  the hosting and nested clusters:
-
-```
-kubectl get nodes     # Hosting cluster
-nk kubectl get nodes  # Nested cluster
-```
-
-- More than one nested cluster can be deployed at once.  Switching
-  between nested clusters is accomplished by sourcing the rc file of
-  the desired cluster.
+- More than one nested cluster can be deployed at once.
 
 - Since the cluster is deployed with helm, helm commands can be used
   to manage the cluster (e.g ``helm delete [cluster id]`` removes the
