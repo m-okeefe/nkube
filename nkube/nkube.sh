@@ -64,17 +64,17 @@ function init-master() {
   # 'configs' module available
 
 
-  echo "about to run kubeadm init, here's the token i'm passing in:"
+  echo "about to run kubeadm init, NEW version, here's the token i'm passing in:"
   echo $kubeadm_token
   echo $cluster_id
 
   kubeadm init \
-          --skip-preflight-checks \
+          --ignore-preflight-errors=all \
           --token "${kubeadm_token}" \
           --service-dns-domain "${cluster_id}.local" \
           --service-cidr "10.27.0.0/16" \
-          --api-advertise-addresses "${pod_ip},${host_ip}" \
-          --api-external-dns-names "${dns_name}"
+          --apiserver-advertise-address "${pod_ip},${host_ip}" #\
+          #--api-external-dns-names "${dns_name}"
 
   local config="/etc/kubernetes/admin.conf"
 

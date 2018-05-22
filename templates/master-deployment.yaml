@@ -17,7 +17,7 @@ spec:
       containers:
         - name: "{{ template "fullname" . }}-master"
           image: meganokeefe/nkube:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - name: kubernetes-api
               containerPort: 6443
