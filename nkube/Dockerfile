@@ -4,7 +4,7 @@
 # The standard name for this image is maru/nkube
 #
 
-from maru/kubeadm
+from meganokeefe/kubeadm:latest
 
 COPY nkube.sh /usr/local/bin
 COPY nkube.service /etc/systemd/system/

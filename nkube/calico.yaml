@@ -74,7 +74,7 @@ spec:
       hostNetwork: true
       containers:
         - name: calico-etcd
-          image: gcr.io/google_containers/etcd:2.2.1
+          image: gcr.io/google_containers/etcd:3.2.18
           env:
             - name: CALICO_ETCD_IP
               valueFrom:
@@ -143,7 +143,7 @@ spec:
         # container programs network policy and routes on each
         # host.
         - name: calico-node
-          image: quay.io/calico/node:v1.0.0
+          image: quay.io/calico/node:v3.1.2
           env:
             # The location of the Calico etcd cluster.
             - name: ETCD_ENDPOINTS
@@ -179,7 +179,7 @@ spec:
         # This container installs the Calico CNI binaries
         # and CNI network config file on each node.
         - name: install-cni
-          image: calico/cni:v1.5.5
+          image: calico/cni:v3.1.2
           command: ["/install-cni.sh"]
           env:
             # The location of the Calico etcd cluster.
@@ -248,7 +248,7 @@ spec:
       hostNetwork: true
       containers:
         - name: calico-policy-controller
-          image: calico/kube-policy-controller:v0.5.1
+          image: kube-policy-controller:v1.0.0-rc3
           env:
             # The location of the Calico etcd cluster.
             - name: ETCD_ENDPOINTS
@@ -292,7 +292,7 @@ spec:
       containers:
         # Writes basic configuration to datastore.
         - name: configure-calico
-          image: calico/ctl:v1.0.0
+          image: calico/ctl:release-v3.1
           args:
           - apply
           - -f

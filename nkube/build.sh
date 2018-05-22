@@ -1,8 +1,8 @@
-#/bin/sh
+#!/bin/bash
 
 set -o errexit
 set -o nounset
 set -o pipefail
 
 BUILD_PATH="$(dirname "${BASH_SOURCE}")"
-docker build -t maru/nkube "${BUILD_PATH}"
+docker build -t meganokeefe/nkube:latest "${BUILD_PATH}"

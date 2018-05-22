@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: "{{ template "fullname" . }}-node"
-          image: maru/nkube
+          image: meganokeefe/nkube:latest
           imagePullPolicy: IfNotPresent
           securityContext:
             privileged: true

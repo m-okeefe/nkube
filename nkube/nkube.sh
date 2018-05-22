@@ -16,6 +16,7 @@ IMAGE_CACHE_PATH="/nkube-cache"
 # TODO enable cluster config persistence (/etc/kubernetes on pv?)
 # TODO allow choice of network plugin
 function init-master() {
+  echo "initting master...."
   local cache_path="${IMAGE_CACHE_PATH}/master"
 
   if [[ -f "/etc/kubernetes/admin.conf" ]]; then
@@ -25,19 +26,31 @@ function init-master() {
   fi
 
   local sa_dir="/var/run/secrets/kubernetes.io/serviceaccount"
+#  echo $sa_dir
   local token; token="$(cat ${sa_dir}/token)"
+#  echo $token
   local namespace; namespace="$(cat ${sa_dir}/namespace)"
+#  echo $namespace
   local api_host="https://kubernetes.default.svc.cluster.local"
+#  echo $api_host
   local kc; kc="kubectl --certificate-authority=${sa_dir}/ca.crt --token=${token} --server ${api_host} --namespace=${namespace}"
+#  echo $kc
 
   local cluster_id; cluster_id="$(cat /etc/nkube/config/cluster-id)"
 
+  echo "getting host ip...."
   local host_ip; host_ip="$(${kc} get pod "$(hostname)" --template '{{ .status.hostIP }}')"
+
+
+  echo "...got host IP: $host_ip"
 
   # Can't retrieve the pod ip from env due to running under systemd.
   local pod_ip; pod_ip="$(ifconfig eth0 | grep 'inet ' | awk '{print $2}')"
 
   local dns_name="${cluster_id}-nkube.${namespace}.svc.cluster.local"
+
+  echo "loading images..."
+
 
   load-images "${cache_path}"
 
@@ -49,6 +62,12 @@ function init-master() {
   local kubeadm_token; kubeadm_token="$(get-kubeadm-token)"
   # TODO skip preflight checks for now because centos doesn't have the
   # 'configs' module available
+
+
+  echo "about to run kubeadm init, here's the token i'm passing in:"
+  echo $kubeadm_token
+  echo $cluster_id
+
   kubeadm init \
           --skip-preflight-checks \
           --token "${kubeadm_token}" \
@@ -140,6 +159,7 @@ function init-node() {
 }
 
 if [[ -f "/etc/nkube/config/is-master" ]]; then
+  echo "hello world! starting master"
   init-master
 else
   init-node

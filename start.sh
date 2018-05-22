@@ -95,7 +95,7 @@ function main() {
 
   local msg="cluster config to become available"
   local condition="does-secret-exist ${namespace} ${secret_name}"
-  wait-for-condition "${msg}" "${condition}" 300
+  wait-for-condition "${msg}" "${condition}" 900
 
   local end; end="$(date +%s)"
   local runtime; runtime="$((end-start))"
