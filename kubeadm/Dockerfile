@@ -6,7 +6,7 @@
 
 
 
-FROM maru/systemd-dind
+FROM meganokeefe/systemd-dind:latest 
 
 ADD k8s.repo /etc/yum.repos.d/
 

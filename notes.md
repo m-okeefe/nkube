@@ -27,4 +27,6 @@ E5TB": token ["<token>"] was not of form ["^([a-z0-9]{6})\\.([a-
 had to add a "lower" in the go template in the chart secret.
 
 
-### bug 3: on kubeadm init, the kubelet service is not up / healthy 
+### bug 3: the kubelet systemd service fails to start
+
+https://github.com/kubernetes/kubeadm/issues/610
