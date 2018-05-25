@@ -26,28 +26,29 @@ function init-master() {
   fi
 
   local sa_dir="/var/run/secrets/kubernetes.io/serviceaccount"
-#  echo $sa_dir
+  echo $sa_dir
   local token; token="$(cat ${sa_dir}/token)"
-#  echo $token
+  echo $token
   local namespace; namespace="$(cat ${sa_dir}/namespace)"
-#  echo $namespace
+  echo $namespace
   local api_host="https://kubernetes.default.svc.cluster.local"
-#  echo $api_host
+  echo $api_host
   local kc; kc="kubectl --certificate-authority=${sa_dir}/ca.crt --token=${token} --server ${api_host} --namespace=${namespace}"
-#  echo $kc
+  echo $kc
 
   local cluster_id; cluster_id="$(cat /etc/nkube/config/cluster-id)"
+  echo $cluster_id
 
   echo "getting host ip...."
   local host_ip; host_ip="$(${kc} get pod "$(hostname)" --template '{{ .status.hostIP }}')"
-
-
   echo "...got host IP: $host_ip"
 
   # Can't retrieve the pod ip from env due to running under systemd.
   local pod_ip; pod_ip="$(ifconfig eth0 | grep 'inet ' | awk '{print $2}')"
+  echo $pod_ip
 
   local dns_name="${cluster_id}-nkube.${namespace}.svc.cluster.local"
+  echo $dns_name
 
   echo "loading images..."
 
@@ -85,9 +86,7 @@ function update-kubelet-conf() {
   local cluster_id=$2
 
   sed -i -e 's+\(.*KUBELET_DNS_ARGS=\).*+\1--cluster-dns='"${cluster_dns}"' --cluster-domain='"${cluster_id}"'.local"+' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-
-  # disable swap
-  echo 'Environment="KUBELET_EXTRA_ARGS=--fail-swap-on=false"' >> /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+  sed -i -e '/Environment="KUBELET_CERTIFICATE_ARGS=--rotate-certificates=true --cert-dir=\/var\/lib\/kubelet\/pki"/a Environment="KUBELET_EXTRA_ARGS=--fail-swap-on=false"' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 
   systemctl daemon-reload
   # kubeadm will restart kubelet as part of init/join

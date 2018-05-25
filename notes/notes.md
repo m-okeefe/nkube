@@ -9,7 +9,9 @@ helm init
 
 ### how to debug once deployed
 
-kubectl exec -it unhinged-chinchilla-nkub-master-66ddbbfc59-5cb2m -- /bin/sh
+kubectl exec -it terrific-duck-nkube-master-6fc97f95f9-vcmpf -- /bin/sh
+
+cat /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 
 journalctl -u nkube.service -f
 
