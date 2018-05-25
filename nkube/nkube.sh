@@ -87,6 +87,9 @@ function init-master() {
 }
 
 function update-kubelet-conf() {
+  # disable swap
+  echo 'Environment="KUBELET_EXTRA_ARGS=--fail-swap-on=false"' >> /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+
   local cluster_dns=$1
   local cluster_id=$2
 
