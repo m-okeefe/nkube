@@ -63,18 +63,12 @@ function init-master() {
   # TODO skip preflight checks for now because centos doesn't have the
   # 'configs' module available
 
-
-  echo "about to run kubeadm init, NEW version, here's the token i'm passing in:"
-  echo $kubeadm_token
-  echo $cluster_id
-
   kubeadm init \
           --ignore-preflight-errors=all \
           --token "${kubeadm_token}" \
           --service-dns-domain "${cluster_id}.local" \
           --service-cidr "10.27.0.0/16" \
           --apiserver-advertise-address "${pod_ip},${host_ip}" #\
-          #--api-external-dns-names "${dns_name}"
 
   local config="/etc/kubernetes/admin.conf"
 
@@ -87,13 +81,14 @@ function init-master() {
 }
 
 function update-kubelet-conf() {
-  # disable swap
-  echo 'Environment="KUBELET_EXTRA_ARGS=--fail-swap-on=false"' >> /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-
   local cluster_dns=$1
   local cluster_id=$2
 
   sed -i -e 's+\(.*KUBELET_DNS_ARGS=\).*+\1--cluster-dns='"${cluster_dns}"' --cluster-domain='"${cluster_id}"'.local"+' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+
+  # disable swap
+  echo 'Environment="KUBELET_EXTRA_ARGS=--fail-swap-on=false"' >> /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+
   systemctl daemon-reload
   # kubeadm will restart kubelet as part of init/join
 }
